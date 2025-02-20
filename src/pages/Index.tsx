@@ -20,11 +20,6 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("spoonacular-api-key");
-    if (savedKey) {
-      setApiKey(savedKey);
-    }
-
     const savedFavorites = localStorage.getItem("favorite-recipes");
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
@@ -105,58 +100,60 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center mb-8">Recipe Search</h1>
         
-        {!apiKey && <ApiKeyInput />}
+        {!apiKey ? (
+          <ApiKeyInput onSave={setApiKey} />
+        ) : (
+          <Tabs defaultValue="search" className="mt-8">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="search">Search</TabsTrigger>
+              <TabsTrigger value="favorites">Favorites</TabsTrigger>
+            </TabsList>
 
-        <Tabs defaultValue="search" className="mt-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-            <TabsTrigger value="search">Search</TabsTrigger>
-            <TabsTrigger value="favorites">Favorites</TabsTrigger>
-          </TabsList>
+            <TabsContent value="search" className="mt-6">
+              <div className="space-y-6">
+                <SearchBar onSearch={searchRecipes} isLoading={isLoading} />
+                <DietFilters
+                  selectedDiets={selectedDiets}
+                  onToggleDiet={toggleDiet}
+                />
+                
+                {isLoading ? (
+                  <p className="text-center text-muted-foreground">Loading...</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                    {recipes.map((recipe) => (
+                      <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        isFavorite={favorites.some((fav) => fav.id === recipe.id)}
+                        onToggleFavorite={toggleFavorite}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="search" className="mt-6">
-            <div className="space-y-6">
-              <SearchBar onSearch={searchRecipes} isLoading={isLoading} />
-              <DietFilters
-                selectedDiets={selectedDiets}
-                onToggleDiet={toggleDiet}
-              />
-              
-              {isLoading ? (
-                <p className="text-center text-muted-foreground">Loading...</p>
+            <TabsContent value="favorites" className="mt-6">
+              {favorites.length === 0 ? (
+                <p className="text-center text-muted-foreground">
+                  No favorite recipes yet. Start searching and add some!
+                </p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                  {recipes.map((recipe) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {favorites.map((recipe) => (
                     <RecipeCard
                       key={recipe.id}
                       recipe={recipe}
-                      isFavorite={favorites.some((fav) => fav.id === recipe.id)}
+                      isFavorite={true}
                       onToggleFavorite={toggleFavorite}
                     />
                   ))}
                 </div>
               )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="favorites" className="mt-6">
-            {favorites.length === 0 ? (
-              <p className="text-center text-muted-foreground">
-                No favorite recipes yet. Start searching and add some!
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {favorites.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    isFavorite={true}
-                    onToggleFavorite={toggleFavorite}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        )}
       </main>
     </div>
   );

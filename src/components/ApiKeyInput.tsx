@@ -1,23 +1,28 @@
-import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function ApiKeyInput() {
-  const [apiKey, setApiKey] = useState("");
+interface ApiKeyInputProps {
+  onSave: (key: string) => void;
+}
+
+export function ApiKeyInput({ onSave }: ApiKeyInputProps) {
+  const [inputKey, setInputKey] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     const savedKey = localStorage.getItem("spoonacular-api-key");
     if (savedKey) {
-      setApiKey(savedKey);
+      setInputKey(savedKey);
+      onSave(savedKey);
     }
-  }, []);
+  }, [onSave]);
 
   const handleSave = () => {
-    localStorage.setItem("spoonacular-api-key", apiKey);
+    localStorage.setItem("spoonacular-api-key", inputKey);
+    onSave(inputKey);
     toast({
       title: "API Key Saved",
       description: "Your API key has been saved successfully.",
@@ -45,8 +50,8 @@ export function ApiKeyInput() {
         <Input
           type="password"
           placeholder="Enter your API key"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
+          value={inputKey}
+          onChange={(e) => setInputKey(e.target.value)}
         />
         <Button onClick={handleSave}>Save</Button>
       </CardContent>
