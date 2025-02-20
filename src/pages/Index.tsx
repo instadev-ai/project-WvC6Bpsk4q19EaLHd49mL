@@ -22,7 +22,7 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedKey = localStorage.getItem("spoonacular-api-key");
+    const savedKey = localStorage.getItem("spoonacularApiKey");
     if (savedKey) {
       setApiKey(savedKey);
     }
@@ -92,7 +92,7 @@ const Index = () => {
   };
 
   const handleResetApiKey = () => {
-    localStorage.removeItem("spoonacular-api-key");
+    localStorage.removeItem("spoonacularApiKey");
     setApiKey("");
     toast({
       title: "API Key Reset",
