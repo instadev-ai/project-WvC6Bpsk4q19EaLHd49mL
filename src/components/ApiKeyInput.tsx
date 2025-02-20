@@ -23,7 +23,7 @@ export function ApiKeyInput({ onSave }: ApiKeyInputProps) {
       return;
     }
     
-    localStorage.setItem("spoonacular-api-key", inputKey);
+    localStorage.setItem("spoonacularApiKey", inputKey);
     onSave(inputKey);
     toast({
       title: "Success",
