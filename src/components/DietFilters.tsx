@@ -20,32 +20,37 @@ interface DietFiltersProps {
 
 export function DietFilters({ selectedDiets, onToggleDiet }: DietFiltersProps) {
   return (
-    <ScrollArea className="w-full">
-      <div className="flex gap-2 p-1 max-w-2xl mx-auto">
-        {DIET_FILTERS.map((diet) => {
-          const isSelected = selectedDiets.includes(diet);
-          return (
-            <Button
-              key={diet}
-              variant="outline"
-              size="sm"
-              className={cn(
-                "whitespace-nowrap",
-                isSelected && "bg-primary text-primary-foreground"
-              )}
-              onClick={() => onToggleDiet(diet)}
-            >
-              <Badge
-                variant={isSelected ? "secondary" : "outline"}
-                className="mr-2"
+    <div className="bg-white rounded-lg shadow-sm p-4">
+      <h3 className="text-sm font-medium text-muted-foreground mb-3">
+        Dietary Preferences
+      </h3>
+      <ScrollArea className="w-full">
+        <div className="flex flex-wrap gap-2">
+          {DIET_FILTERS.map((diet) => {
+            const isSelected = selectedDiets.includes(diet);
+            return (
+              <Button
+                key={diet}
+                variant={isSelected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onToggleDiet(diet)}
+                className={cn(
+                  "transition-all duration-200",
+                  isSelected && "bg-primary text-primary-foreground"
+                )}
               >
-                {selectedDiets.includes(diet) ? "✓" : "+"}
-              </Badge>
-              {diet}
-            </Button>
-          );
-        })}
-      </div>
-    </ScrollArea>
+                <Badge
+                  variant={isSelected ? "secondary" : "outline"}
+                  className="mr-2 bg-transparent"
+                >
+                  {isSelected ? "✓" : "+"}
+                </Badge>
+                {diet}
+              </Button>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

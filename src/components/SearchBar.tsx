@@ -13,19 +13,25 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query);
+    if (query.trim()) {
+      onSearch(query);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="relative group">
       <Input
         type="text"
-        placeholder="Enter ingredients (e.g., chicken, rice, tomatoes)"
+        placeholder="Search recipes (e.g., chicken pasta, vegetarian curry)"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="flex-1"
+        className="w-full pl-4 pr-24 h-12 bg-white shadow-sm transition-shadow duration-200 group-hover:shadow-md"
       />
-      <Button type="submit" disabled={isLoading}>
+      <Button 
+        type="submit" 
+        disabled={isLoading || !query.trim()}
+        className="absolute right-1 top-1 bottom-1"
+      >
         <Search className="h-4 w-4 mr-2" />
         Search
       </Button>

@@ -4,13 +4,14 @@ import { SearchBar } from "@/components/SearchBar";
 import { DietFilters } from "@/components/DietFilters";
 import { RecipeCard, type Recipe } from "@/components/RecipeCard";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { ChefHat, Settings } from "lucide-react";
 
 const Index = () => {
   const [apiKey, setApiKey] = useState("");
@@ -21,13 +22,11 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load API key on mount
     const savedKey = localStorage.getItem("spoonacular-api-key");
     if (savedKey) {
       setApiKey(savedKey);
     }
 
-    // Load favorites
     const savedFavorites = localStorage.getItem("favorite-recipes");
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
@@ -92,17 +91,6 @@ const Index = () => {
     );
   };
 
-  const toggleFavorite = (recipe: Recipe) => {
-    setFavorites((current) => {
-      const newFavorites = current.some((fav) => fav.id === recipe.id)
-        ? current.filter((fav) => fav.id !== recipe.id)
-        : [...current, recipe];
-      
-      localStorage.setItem("favorite-recipes", JSON.stringify(newFavorites));
-      return newFavorites;
-    });
-  };
-
   const handleResetApiKey = () => {
     localStorage.removeItem("spoonacular-api-key");
     setApiKey("");
@@ -112,72 +100,104 @@ const Index = () => {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center mb-8">Recipe Search</h1>
-        
-        {!apiKey ? (
+  if (!apiKey) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 px-4">
+        <div className="container mx-auto py-16">
+          <div className="flex items-center justify-center mb-8">
+            <ChefHat className="h-12 w-12 text-primary mr-4" />
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+              Recipe Search
+            </h1>
+          </div>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Discover delicious recipes, save your favorites, and cook with confidence.
+            Get started by adding your Spoonacular API key below.
+          </p>
           <ApiKeyInput onSave={setApiKey} />
-        ) : (
-          <>
-            <div className="flex justify-end mb-4">
-              <Button variant="outline" size="sm" onClick={handleResetApiKey}>
-                Reset API Key
-              </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <header className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <ChefHat className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold text-primary">Recipe Search</h1>
+          </div>
+          <Button variant="ghost" size="icon" onClick={handleResetApiKey}>
+            <Settings className="h-5 w-5" />
+          </Button>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="search" className="space-y-8">
+          <div className="flex flex-col items-center">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="search">Search</TabsTrigger>
+              <TabsTrigger value="favorites">Favorites</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="search" className="space-y-6">
+            <div className="max-w-2xl mx-auto space-y-6">
+              <SearchBar onSearch={searchRecipes} isLoading={isLoading} />
+              <DietFilters
+                selectedDiets={selectedDiets}
+                onToggleDiet={toggleDiet}
+              />
             </div>
-            <Tabs defaultValue="search" className="mt-8">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-                <TabsTrigger value="search">Search</TabsTrigger>
-                <TabsTrigger value="favorites">Favorites</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="search" className="mt-6">
-                <div className="space-y-6">
-                  <SearchBar onSearch={searchRecipes} isLoading={isLoading} />
-                  <DietFilters
-                    selectedDiets={selectedDiets}
-                    onToggleDiet={toggleDiet}
+            
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-4">Searching for recipes...</p>
+              </div>
+            ) : recipes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                {recipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    isFavorite={favorites.some((fav) => fav.id === recipe.id)}
+                    onToggleFavorite={() => {}}
                   />
-                  
-                  {isLoading ? (
-                    <p className="text-center text-muted-foreground">Loading...</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                      {recipes.map((recipe) => (
-                        <RecipeCard
-                          key={recipe.id}
-                          recipe={recipe}
-                          isFavorite={favorites.some((fav) => fav.id === recipe.id)}
-                          onToggleFavorite={toggleFavorite}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  Enter ingredients above to search for recipes
+                </p>
+              </div>
+            )}
+          </TabsContent>
 
-              <TabsContent value="favorites" className="mt-6">
-                {favorites.length === 0 ? (
-                  <p className="text-center text-muted-foreground">
-                    No favorite recipes yet. Start searching and add some!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {favorites.map((recipe) => (
-                      <RecipeCard
-                        key={recipe.id}
-                        recipe={recipe}
-                        isFavorite={true}
-                        onToggleFavorite={toggleFavorite}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
+          <TabsContent value="favorites">
+            {favorites.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  No favorite recipes yet. Start searching and add some!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favorites.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    isFavorite={true}
+                    onToggleFavorite={() => {}}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
