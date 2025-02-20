@@ -4,6 +4,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { DietFilters } from "@/components/DietFilters";
 import { RecipeCard, type Recipe } from "@/components/RecipeCard";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import {
   Tabs,
   TabsContent,
